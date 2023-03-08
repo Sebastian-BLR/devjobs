@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+class NuevoCandidato extends Notification
+{
+    use Queueable;
+
+    /**
+     * Create a new notification instance.
+     */
+
+    public $id_vacante;
+    public $nombre_vacante;
+    public $usuario_id;
+
+    public function __construct($id_vacante, $nombre_vacante, $usuario_id)
+    {
+        $this -> id_vacante     = $id_vacante;
+        $this -> nombre_vacante = $nombre_vacante;
+        $this -> usuario_id     = $usuario_id;
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        $url =  url("/notificaciones");
+
+        return (new MailMessage)
+                    ->greeting('¡Hola!')
+                    ->line('Has recibido un nuevo candidato en tu vacente.')
+                    ->line("La vacante: {$this -> nombre_vacante}")
+                    ->action('Ver Notificaciones', $url)
+                    ->salutation('Gracias por utilizar DevJobs');
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    // Almacena las notificaciones en la base de datos
+    public function toDatabase(object $notifiable)
+    {
+        return [
+            'id_vacante'     => $this -> id_vacante,
+            'nombre_vacante' => $this -> nombre_vacante,
+            'usuario_id'     => $this -> usuario_id,
+        ];
+    }
+}
